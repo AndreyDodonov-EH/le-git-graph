@@ -1,6 +1,6 @@
 async function openCommitsTab() {
     isCommitsTabOpen = true;
-    var commitsTabButton = document.getElementById("commits-tab");
+    var commitsTabButton = document.getElementById("commits-tab-fork");
     commitsTabButton.removeEventListener("click", openCommitsTab);
 
     showCommitsLoading();
@@ -36,7 +36,7 @@ async function openCommitsTab() {
     for (var j = 0; j < parentObject.children.length; j++) {
         var child = parentObject.children[j];
         if (child && child.children && child.children[0]) {
-            if (child.children[0].id === 'commits-tab') {
+            if (child.children[0].id === 'commits-tab-fork') {
                 newButton = child;
                 newButtonChild = child.children[0];
                 break;
@@ -58,7 +58,7 @@ async function openCommitsTab() {
 
         // Deselect all the tabs except commits tab.
         Array.from(parentObject.children).forEach((child) => {
-            if (child.children[0].id != "commits-tab") {
+            if (child.children[0].id != "commits-tab-fork") {
                 child.children[0].removeAttribute("aria-current");
                 child.children[0].classList.remove("selected");
             }
@@ -73,6 +73,13 @@ async function openCommitsTab() {
             clearInterval(interval);
         }
     }, 1000);
+
+    // Try the cookie-based network graph source first. It works while logged in
+    // with zero setup (no OAuth token), including private/org repos the user can
+    // already view, and falls back silently to the GraphQL/OAuth flow on failure.
+    if (await fetchNetworkGraphCommits()) {
+        return;
+    }
 
     // Try to fetch stored authorization token
     var authorizationToken = getLocalToken();

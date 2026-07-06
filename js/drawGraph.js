@@ -112,8 +112,24 @@ async function addCardContent(commitId, commitDot, hoverCardParent) {
   }
   var additionCountWrapper = hoverCardParent.querySelector("#addition-count");
   var deletionCountWrapper = hoverCardParent.querySelector("#deletion-count");
-  additionCountWrapper.innerHTML = commit.additions;
-  deletionCountWrapper.innerHTML = commit.deletions;
+  if (typeof window !== "undefined" && window.leGitGraphNetworkMode && !commit.statsLoaded) {
+    // Network graph mode: additions/deletions aren't in the graph data, so load
+    // them lazily from the commit page and fill the card once resolved.
+    additionCountWrapper.innerHTML = "…";
+    deletionCountWrapper.innerHTML = "…";
+    enrichNetworkGraphCommitStats(commit).then(function () {
+      if (hoveredCommitSha != commitId) return;
+      var container = document.getElementById("hoverCardContainer");
+      if (!container) return;
+      var liveAddition = container.querySelector("#addition-count");
+      var liveDeletion = container.querySelector("#deletion-count");
+      if (liveAddition) liveAddition.innerHTML = commit.additions;
+      if (liveDeletion) liveDeletion.innerHTML = commit.deletions;
+    });
+  } else {
+    additionCountWrapper.innerHTML = commit.additions;
+    deletionCountWrapper.innerHTML = commit.deletions;
+  }
   var hoverCardContainer = document.getElementById("hoverCardContainer");
   hoverCardContainer.innerHTML = hoverCardParent.innerHTML;
   hoverCardContainer.children[0].style.display = 'block';

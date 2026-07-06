@@ -2,7 +2,7 @@ var isCommitsTabOpen = false;
 
 function addCommitsButton() {
     // Prevent duplicate tabs
-    if (document.getElementById('commits-tab')) {
+    if (document.getElementById('commits-tab-fork')) {
         return;
     }
 
@@ -55,9 +55,9 @@ function addCommitsButton() {
     }
 
     // Configure the new Commits tab
-    newButtonChild.id = "commits-tab";
+    newButtonChild.id = "commits-tab-fork";
     newButtonChild.setAttribute("aria-disabled", "true");
-    newButtonChild.setAttribute("data-tab-item", "commits-tab");
+    newButtonChild.setAttribute("data-tab-item", "commits-tab-fork");
     newButtonChild.removeAttribute("aria-current");
     newButtonChild.classList.remove("selected");
     newButtonChild.setAttribute("data-selected-links", "repo_commits repo_milestones /NirmalScaria/le-git-graph/commits")
@@ -86,8 +86,8 @@ function addCommitsButton() {
     // Update label
     try {
         if (newButtonChild.children[1]) {
-            newButtonChild.children[1].setAttribute("data-content", "Commits");
-            newButtonChild.children[1].innerText = "Commits";
+            newButtonChild.children[1].setAttribute("data-content", "Commits (Fork)");
+            newButtonChild.children[1].innerText = "Commits (Fork)";
         }
     } catch (e) {
         // Label update failed, continue
@@ -117,7 +117,7 @@ function addCommitsButton() {
 
     // Watch for DOM changes during initial load and re-add if GitHub removes the tab
     var observer = new MutationObserver(function() {
-        if (!document.getElementById('commits-tab')) {
+        if (!document.getElementById('commits-tab-fork')) {
             addCommitsButton();
         }
     });
@@ -136,7 +136,7 @@ function addCommitsButton() {
 
     function closeCommitsTab() {
         isCommitsTabOpen = false;
-        var commitsTabButton = document.getElementById("commits-tab");
+        var commitsTabButton = document.getElementById("commits-tab-fork");
         commitsTabButton.addEventListener("click", openCommitsTab);
         newButtonChild.removeAttribute("aria-current");
         newButtonChild.removeAttribute("data-selected-links");

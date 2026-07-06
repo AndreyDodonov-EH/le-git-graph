@@ -14,7 +14,7 @@ function installFre(resume) {
 async function installFreStep1() {
     createOverlay();
     clearToolTip();
-    var commitButton = document.getElementById("commits-tab");
+    var commitButton = document.getElementById("commits-tab-fork");
     focusOnItem(commitButton, 10);
     showToolTip(
         commitButton,

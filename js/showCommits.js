@@ -61,6 +61,11 @@ function assignColors(commits, heads) {
 // Get the required commit details from api
 // commits parameter contains the commit shas
 async function getCommitDetails(repoOwner, repoName, commits, allCommits) {
+  // The network graph source already supplies parents (and author details),
+  // so there is nothing to fetch. Skip the token-authenticated GraphQL call.
+  if (commits.every(function (commit) { return Array.isArray(commit.parents); })) {
+    return [commits, allCommits];
+  }
   var queryBeginning =
     `
     query { 

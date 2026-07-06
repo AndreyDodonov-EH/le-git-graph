@@ -6,6 +6,36 @@
 // The idea is to fetch the last 20 commits in the history
 // of each of the last 10 commits that are displayed.
 async function fetchFurther(commits, allCommits, heads, pageNo, branchNames, allBranches) {
+  // In network graph mode, allCommits holds the fetched windows with parents.
+  // Pagination reveals more of them, fetching older windows on demand -- no
+  // GraphQL needed.
+  if (window.leGitGraphNetworkMode) {
+    var networkLoaderOl = document.getElementById("commitsOl");
+    var networkLoadingIcon = chrome.runtime.getURL('html/commitsLoading.html');
+    await fetch(networkLoadingIcon).then(response => response.text()).then(loadingIconText => {
+      var tempDiv = document.createElement('div');
+      tempDiv.innerHTML = loadingIconText;
+      var newContent = tempDiv.firstChild;
+      if (networkLoaderOl && newContent) networkLoaderOl.appendChild(newContent);
+    });
+    pageNo += 1;
+    var networkNeeded = 10 * pageNo;
+    // Fetch older windows until we have enough commits to fill the page or the
+    // history is exhausted.
+    while (
+      allCommits.length < networkNeeded &&
+      typeof leGitGraphNetworkState !== "undefined" &&
+      leGitGraphNetworkState &&
+      leGitGraphNetworkState.loadedStart > 0
+    ) {
+      allCommits = await loadOlderNetworkGraphCommits(allCommits);
+    }
+    var networkCommitsToShow = allCommits.slice(0, networkNeeded);
+    await showCommits(networkCommitsToShow, branchNames, allCommits, heads, pageNo, allBranches);
+    showLegend(heads);
+    return (true);
+  }
+
   // commits array just contains the last 10 commits so that their 
   // 10 levels of history can be fetched.
 
